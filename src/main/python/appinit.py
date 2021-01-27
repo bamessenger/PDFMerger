@@ -1,4 +1,4 @@
-from PyQt5.QtCore import QRunnable
+from PyQt5.QtCore import QRunnable, QThreadPool
 from PyQt5.QtWidgets import QFileDialog, QListView, QTreeView, \
     QAbstractItemView, QDialog
 from PyQt5 import QtWidgets
@@ -7,17 +7,24 @@ from userinterface import Ui_MainWindow
 from pdfmerge import ExecutePDF
 
 class Worker(QRunnable):
-    def __init__(self):
+    def __init__(self, copy, insert, pgstart, pgiter):
         super().__init__()
+        self.executepdf = ExecutePDF()
+        self.copy = copy
+        self.insert = insert
+        self.pgstart = pgstart
+        self.pgiter = pgiter
+
+    def run(self):
+        self.executepdf.merge(self.copy, self.insert, self.pgstart, self.pgiter)
 
 class MainWindowUI(QtWidgets.QMainWindow):
     def __init__(self):
         super(MainWindowUI, self).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        self.executepdf = ExecutePDF()
-        self.copyFromFile = None
-        self.insertIntoFiles = None
+        self.threadpool = QThreadPool()
+
 
         self.ui.frame_3.hide()
         self.ui.BrowseFileCopy.clicked.connect(self.browseCopyFrom)
@@ -54,7 +61,8 @@ class MainWindowUI(QtWidgets.QMainWindow):
                 self.ui.FileNamesInsertInto.append(self.insertIntoFiles[file])
 
     def execute(self):
-        self.executepdf.merge(self.copyFromFile,
+        worker = Worker(self.copyFromFile,
                               self.insertIntoFiles,
                               self.ui.InsertAfterPageNum.value(),
                               self.ui.InsertEveryNthPageNum.value())
+        self.threadpool.start(worker)
