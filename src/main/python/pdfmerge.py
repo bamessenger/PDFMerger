@@ -1,15 +1,11 @@
 import sys
 import os.path
-
 import tkinter as tk
 import tkinter.messagebox
-
 from PyPDF2 import PdfFileMerger, PdfFileReader
 
-
 class ExecutePDF:
-    def merge(self, fileCopy, fileInsertInto, pageStart,
-                        pageIteration):
+    def merge(self, fileCopy, fileInsertInto, pageStart, pageIteration):
         # Increase system recursion limit to compensate for larger files
         sys.setrecursionlimit(2000)
         # Loop through each file chosen by user
@@ -33,6 +29,7 @@ class ExecutePDF:
             mergedObject.close()
         # call message box after successful completion
         self.completeMsg()
+
 
     def completeMsg(self):
         root = tk.Tk()
