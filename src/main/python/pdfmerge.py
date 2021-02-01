@@ -1,10 +1,13 @@
 import sys
 import os.path
-import tkinter as tk
-import tkinter.messagebox
+
+from feedback import Feedback
 from PyPDF2 import PdfFileMerger, PdfFileReader
 
 class ExecutePDF:
+    def __init__(self):
+        self.feedback = Feedback()
+
     def merge(self, fileCopy, fileInsertInto, pageStart, pageIteration):
         # Increase system recursion limit to compensate for larger files
         sys.setrecursionlimit(2000)
@@ -28,10 +31,9 @@ class ExecutePDF:
             sys.setrecursionlimit(1000)
             mergedObject.close()
         # call message box after successful completion
-        self.completeMsg()
+        self.feedback.completeMsg()
+
+        return
 
 
-    def completeMsg(self):
-        root = tk.Tk()
-        root.withdraw()
-        tk.messagebox.showinfo("Status Update", "Merge operation complete")
+

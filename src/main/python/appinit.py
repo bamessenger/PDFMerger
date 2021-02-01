@@ -1,6 +1,6 @@
 from PyQt5.QtCore import QRunnable, QThreadPool
 from PyQt5.QtWidgets import QFileDialog, QListView, QTreeView, \
-    QAbstractItemView, QDialog
+    QAbstractItemView, QDialog, QMessageBox, QPushButton
 from PyQt5 import QtWidgets
 from userinterface import Ui_MainWindow
 from pdfmerge import ExecutePDF
@@ -8,7 +8,7 @@ from pdfmerge import ExecutePDF
 
 class Worker(QRunnable):
     def __init__(self, copy, insert, pgstart, pgiter):
-        super().__init__()
+        super(Worker, self).__init__()
         self.executepdf = ExecutePDF()
         self.mainwindowUI = MainWindowUI()
         self.copy = copy
@@ -18,7 +18,6 @@ class Worker(QRunnable):
 
     def run(self):
         self.executepdf.merge(self.copy, self.insert, self.pgstart, self.pgiter)
-
 
 class MainWindowUI(QtWidgets.QMainWindow):
     def __init__(self):
@@ -32,6 +31,7 @@ class MainWindowUI(QtWidgets.QMainWindow):
         self.ui.ExecuteButton.clicked.connect(self.execute)
 
     def browseCopyFrom(self):
+        self.hideFrame3()
         options = QtWidgets.QFileDialog.Options()
         options |= QtWidgets.QFileDialog.DontUseNativeDialog
         self.copyFromFile, _ = QtWidgets.QFileDialog.getOpenFileName(None,
@@ -61,12 +61,13 @@ class MainWindowUI(QtWidgets.QMainWindow):
                 self.ui.FileNamesInsertInto.append(self.insertIntoFiles[file])
 
     def execute(self):
-        #self.showFrame3()
+        QMessageBox.about(self, "Title", "Message")
         worker = Worker(self.copyFromFile,
                               self.insertIntoFiles,
                               self.ui.InsertAfterPageNum.value(),
                               self.ui.InsertEveryNthPageNum.value())
         self.threadpool.start(worker)
+
 
     def showFrame3(self):
         self.ui.frame_3.show()
