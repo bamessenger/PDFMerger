@@ -1,7 +1,6 @@
 import sys
 import os.path
-import tkinter as tk
-import tkinter.messagebox
+
 from PyPDF2 import PdfFileMerger, PdfFileReader
 
 class ExecutePDF:
@@ -27,11 +26,3 @@ class ExecutePDF:
             # reset system recursion limit back to system default
             sys.setrecursionlimit(1000)
             mergedObject.close()
-        # call message box after successful completion
-        self.completeMsg()
-
-
-    def completeMsg(self):
-        root = tk.Tk()
-        root.withdraw()
-        tk.messagebox.showinfo("Status Update", "Merge operation complete")
