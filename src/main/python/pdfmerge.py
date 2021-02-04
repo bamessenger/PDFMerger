@@ -1,13 +1,9 @@
 import sys
 import os.path
 
-from feedback import Feedback
 from PyPDF2 import PdfFileMerger, PdfFileReader
 
 class ExecutePDF:
-    def __init__(self):
-        self.feedback = Feedback()
-
     def merge(self, fileCopy, fileInsertInto, pageStart, pageIteration):
         # Increase system recursion limit to compensate for larger files
         sys.setrecursionlimit(2000)
@@ -30,10 +26,3 @@ class ExecutePDF:
             # reset system recursion limit back to system default
             sys.setrecursionlimit(1000)
             mergedObject.close()
-        # call message box after successful completion
-        self.feedback.completeMsg()
-
-        return
-
-
-
