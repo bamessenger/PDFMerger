@@ -1,5 +1,5 @@
-('C:\\Users\\brand\\Cedar Insights Dropbox\\Brandon '
- 'Messenger\\upwork\\sherman_bryan\\PDFMerger\\target\\PyInstaller\\PDFMerger\\PKG-00.pkg',
+('C:\\Users\\brand\\OneDrive - InsureGood LLC\\Documents - Cedar '
+ 'Insights\\applications\\PDFMerger\\target\\PyInstaller\\PDFMerger\\PKG-00.pkg',
  {'BINARY': 1,
   'DATA': 1,
   'EXECUTABLE': 1,
@@ -8,8 +8,8 @@
   'PYSOURCE': 1,
   'PYZ': 0},
  [('PYZ-00.pyz',
-   'C:\\Users\\brand\\Cedar Insights Dropbox\\Brandon '
-   'Messenger\\upwork\\sherman_bryan\\PDFMerger\\target\\PyInstaller\\PDFMerger\\PYZ-00.pyz',
+   'C:\\Users\\brand\\OneDrive - InsureGood LLC\\Documents - Cedar '
+   'Insights\\applications\\PDFMerger\\target\\PyInstaller\\PDFMerger\\PYZ-00.pyz',
    'PYZ'),
   ('struct',
    'c:\\users\\brand\\appdata\\local\\programs\\python\\python36\\lib\\struct.pyo',
@@ -27,22 +27,19 @@
    'c:\\users\\brand\\appdata\\local\\programs\\python\\python36\\lib\\site-packages\\PyInstaller\\loader\\pyiboot01_bootstrap.py',
    'PYSOURCE'),
   ('fbs_pyinstaller_hook',
-   'C:\\Users\\brand\\Cedar Insights Dropbox\\Brandon '
-   'Messenger\\upwork\\sherman_bryan\\PDFMerger\\target\\PyInstaller\\fbs_pyinstaller_hook.py',
-   'PYSOURCE'),
-  ('pyi_rth__tkinter',
-   'c:\\users\\brand\\appdata\\local\\programs\\python\\python36\\lib\\site-packages\\PyInstaller\\loader\\rthooks\\pyi_rth__tkinter.py',
+   'C:\\Users\\brand\\OneDrive - InsureGood LLC\\Documents - Cedar '
+   'Insights\\applications\\PDFMerger\\target\\PyInstaller\\fbs_pyinstaller_hook.py',
    'PYSOURCE'),
   ('pyi_rth_qt5',
    'c:\\users\\brand\\appdata\\local\\programs\\python\\python36\\lib\\site-packages\\PyInstaller\\loader\\rthooks\\pyi_rth_qt5.py',
    'PYSOURCE'),
   ('main',
-   'C:\\Users\\brand\\Cedar Insights Dropbox\\Brandon '
-   'Messenger\\upwork\\sherman_bryan\\PDFMerger\\src\\main\\python\\main.py',
+   'C:\\Users\\brand\\OneDrive - InsureGood LLC\\Documents - Cedar '
+   'Insights\\applications\\PDFMerger\\src\\main\\python\\main.py',
    'PYSOURCE'),
   ('PDFMerger.exe.manifest',
-   'C:\\Users\\brand\\Cedar Insights Dropbox\\Brandon '
-   'Messenger\\upwork\\sherman_bryan\\PDFMerger\\target\\PyInstaller\\PDFMerger\\PDFMerger.exe.manifest',
+   'C:\\Users\\brand\\OneDrive - InsureGood LLC\\Documents - Cedar '
+   'Insights\\applications\\PDFMerger\\target\\PyInstaller\\PDFMerger\\PDFMerger.exe.manifest',
    'BINARY')],
  True,
  False,
