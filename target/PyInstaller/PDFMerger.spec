@@ -3,13 +3,13 @@
 block_cipher = None
 
 
-a = Analysis(['C:\\Users\\brand\\Cedar Insights Dropbox\\Brandon Messenger\\upwork\\sherman_bryan\\PDFMerger\\src\\main\\python\\main.py'],
-             pathex=['C:\\Users\\brand\\Cedar Insights Dropbox\\Brandon Messenger\\upwork\\sherman_bryan\\PDFMerger\\target\\PyInstaller'],
+a = Analysis(['C:\\Users\\brand\\OneDrive - InsureGood LLC\\Documents - Cedar Insights\\applications\\PDFMerger\\src\\main\\python\\main.py'],
+             pathex=['C:\\Users\\brand\\OneDrive - InsureGood LLC\\Documents - Cedar Insights\\applications\\PDFMerger\\target\\PyInstaller'],
              binaries=[],
              datas=[],
              hiddenimports=[],
              hookspath=['c:\\users\\brand\\appdata\\local\\programs\\python\\python36\\lib\\site-packages\\fbs\\freeze\\hooks'],
-             runtime_hooks=['C:\\Users\\brand\\Cedar Insights Dropbox\\Brandon Messenger\\upwork\\sherman_bryan\\PDFMerger\\target\\PyInstaller\\fbs_pyinstaller_hook.py'],
+             runtime_hooks=['C:\\Users\\brand\\OneDrive - InsureGood LLC\\Documents - Cedar Insights\\applications\\PDFMerger\\target\\PyInstaller\\fbs_pyinstaller_hook.py'],
              excludes=[],
              win_no_prefer_redirects=False,
              win_private_assemblies=False,
@@ -26,7 +26,7 @@ exe = EXE(pyz,
           bootloader_ignore_signals=False,
           strip=False,
           upx=False,
-          console=False , icon='C:\\Users\\brand\\Cedar Insights Dropbox\\Brandon Messenger\\upwork\\sherman_bryan\\PDFMerger\\src\\main\\icons\\Icon.ico')
+          console=False , icon='C:\\Users\\brand\\OneDrive - InsureGood LLC\\Documents - Cedar Insights\\applications\\PDFMerger\\src\\main\\icons\\Icon.ico')
 coll = COLLECT(exe,
                a.binaries,
                a.zipfiles,

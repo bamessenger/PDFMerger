@@ -1,22 +1,13 @@
-from PyQt5.QtCore import QRunnable, QThreadPool, pyqtSlot
+
+import time
+
+from PyQt5.QtCore import QRunnable, QThreadPool, QObject, pyqtSignal
 from PyQt5.QtWidgets import QFileDialog, QListView, QTreeView, \
     QAbstractItemView, QDialog, QMessageBox
 from PyQt5 import QtWidgets
 from userinterface import Ui_MainWindow
 from pdfmerge import ExecutePDF
-
-
-class Worker(QRunnable):
-    def __init__(self, copy, insert, pgstart, pgiter):
-        super(Worker, self).__init__()
-        self.executepdf = ExecutePDF()
-        self.copy = copy
-        self.insert = insert
-        self.pgstart = pgstart
-        self.pgiter = pgiter
-
-    def run(self):
-        self.executepdf.merge(self.copy, self.insert, self.pgstart, self.pgiter)
+from worker import WorkerSignals, Worker
 
 
 class MainWindowUI(QtWidgets.QMainWindow):
@@ -25,15 +16,14 @@ class MainWindowUI(QtWidgets.QMainWindow):
         self.ui = Ui_MainWindow()
         self.msgBox = QMessageBox()
         self.ui.setupUi(self)
+        self.signals = WorkerSignals()
         self.threadpool = QThreadPool()
-        self.hideFrame3()
+        self.executePDF = ExecutePDF()
         # Connect button signals to slots
         self.ui.BrowseFileCopy.clicked.connect(self.browseCopyFrom)
         self.ui.BrowseFileInsertInto.clicked.connect(self.browseInsertInto)
-        self.ui.ExecuteButton.clicked.connect(self.execute)
-        self.ui.ExecuteButton.clicked.connect(self.showFrame3)
+        self.ui.ExecuteButton.clicked.connect(self.clickedExecute)
 
-    @pyqtSlot()
     def browseCopyFrom(self):
         options = QtWidgets.QFileDialog.Options()
         options |= QtWidgets.QFileDialog.DontUseNativeDialog
@@ -47,7 +37,6 @@ class MainWindowUI(QtWidgets.QMainWindow):
         if self.copyFromFile:
             self.ui.FileNameCopy.setText(self.copyFromFile)
 
-    @pyqtSlot()
     def browseInsertInto(self):
         multiSelect = QFileDialog()
         multiSelect.setOption(multiSelect.DontUseNativeDialog, True)
@@ -65,27 +54,43 @@ class MainWindowUI(QtWidgets.QMainWindow):
             for file in range(len(self.insertIntoFiles)):
                 self.ui.FileNamesInsertInto.append(self.insertIntoFiles[file])
 
-    @pyqtSlot()
-    def execute(self):
-        self.worker = Worker(self.copyFromFile, self.insertIntoFiles,
-                             self.ui.InsertAfterPageNum.value(),
-                             self.ui.InsertEveryNthPageNum.value())
-        self.threadpool.start(self.worker)
-        # call message box after successful completion
-        if self.threadpool.waitForDone():
-            self.showCompletion()
+    def pdfJob(self, progress_callback):
+        self.executePDF.merge(self.copyFromFile, self.insertIntoFiles,
+                              self.ui.InsertAfterPageNum.value(),
+                              self.ui.InsertEveryNthPageNum.value())
+        for n in range(0, 5):
+            time.sleep(1)
+            progress_callback.emit((n * 100 / 4))
+
+    def progressNum(self, n):
+        self.ui.progress_label.setText("Merging in Progress...%d%% done" % n)
+
+    def startProc(self):
+        self.ui.progress_label.setText("Merging in Progress...firing up the "
+                                       "engine")
 
     def showCompletion(self):
         self.msgBox.setIcon(QMessageBox.Information)
         self.msgBox.setText("Merge Completed Successfully")
         self.msgBox.setWindowTitle("Program Status")
         self.msgBox.setStandardButtons(QMessageBox.Ok)
-
         self.msgBox.exec()
 
-    @pyqtSlot()
-    def showFrame3(self):
-        self.ui.frame_3.show()
+    def completed(self):
+        self.showCompletion()
+        self.ui.progress_label.setText(" ")
+        return
 
-    def hideFrame3(self):
-        self.ui.frame_3.hide()
+    def clickedExecute(self):
+        # call process
+        self.stopped = False
+        self.runThreadedProcess()
+
+    def runThreadedProcess(self):
+        # Execute a function in the background with a worker
+        worker = Worker(self.pdfJob)
+        worker.signals.start.connect(self.startProc)
+        worker.signals.progress.connect(self.progressNum)
+        worker.signals.finished.connect(self.completed)
+        # start worker
+        self.threadpool.start(worker)

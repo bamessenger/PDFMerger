@@ -48,12 +48,12 @@ class Ui_MainWindow(QObject):
         self.frame_3.setObjectName("frame_3")
         #self.progressBar = QtWidgets.QProgressBar(self.frame_3)
         #self.progressBar.setGeometry(QtCore.QRect(37, 50, 791, 23))
-        #self.progressBar.setProperty("value", 24)
+        #self.progressBar.setProperty("value", 0)
         #self.progressBar.setObjectName("progressBar")
-        self.progressBar_label = QtWidgets.QLabel(self.frame_3)
-        self.progressBar_label.setGeometry(QtCore.QRect(4, 20, 831, 21))
-        self.progressBar_label.setAlignment(QtCore.Qt.AlignCenter)
-        self.progressBar_label.setObjectName("progressBar_label")
+        self.progress_label = QtWidgets.QLabel(self.frame_3)
+        self.progress_label.setGeometry(QtCore.QRect(4, 20, 831, 21))
+        self.progress_label.setAlignment(QtCore.Qt.AlignCenter)
+        self.progress_label.setObjectName("progressBar_label")
         self.frame_2 = QtWidgets.QFrame(self.centralwidget)
         self.frame_2.setGeometry(QtCore.QRect(29, 290, 841, 421))
         self.frame_2.setFrameShape(QtWidgets.QFrame.StyledPanel)
@@ -169,11 +169,8 @@ class Ui_MainWindow(QObject):
         self.InsertInto_Label.setText(
             _translate("MainWindow", "PDF File(s) (insert into):"))
         self.Title_Label.setText(_translate("MainWindow", "PDFMerger"))
-        self.progressBar_label.setText(
-            _translate("MainWindow", "Merging Process running, "
-                                     "please be patient as large "
-                                     "files can take a few "
-                                     "minutes..."))
+        self.progress_label.setText(
+            _translate("MainWindow", " "))
         self.BrowseFileInsertInto_Label.setText(
             _translate("MainWindow", "File Name(s):"))
         self.BrowseFileInsertInto.setText(_translate("MainWindow", "Browse"))
