@@ -21,8 +21,8 @@ class ExecutePDF:
             # Write all the files into a file which is named as shown below
             # File directory is that of the last insert into file chosen
             directory = os.path.dirname(fileInsertInto[-1])
-            mergedObject.write(directory+"/"+"mergedfilesoutput"+str(
-                                files)+".pdf")
+            mergedObject.write(os.path.splitext(fileInsertInto[
+                files])[0]+"_MERGED.pdf")
             # reset system recursion limit back to system default
             sys.setrecursionlimit(1000)
             mergedObject.close()
