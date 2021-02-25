@@ -176,10 +176,10 @@ class Ui_MainWindow(QObject):
         self.BrowseFileInsertInto.setText(_translate("MainWindow", "Browse"))
         self.InsertAfterPageNum_Label.setText(
             _translate("MainWindow", "Start Insert "
-                                     "AFTER Page:"))
+                                     "AT Page:"))
         self.InsertEveryNthPageNum_Label.setText(
             _translate("MainWindow", "Insert Every "
-                                     "nth Page:"))
+                                     "nth Page(s):"))
         self.BrowseFileCopy_Label.setText(
             _translate("MainWindow", "File Name:"))
         self.BrowseFileCopy.setText(_translate("MainWindow", "Browse"))
