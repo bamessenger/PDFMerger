@@ -14,6 +14,7 @@ class WorkerSignals(QObject):
 
 
 class Worker(QRunnable):
+
     def __init__(self, fn, *args, **kwargs):
         super(Worker, self).__init__()
         # Store constructor arguments (re-used for processing)
