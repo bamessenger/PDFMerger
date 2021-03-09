@@ -1,40 +1,59 @@
-import sys
-import traceback
+import math
+import os.path
 
-from PyQt5.QtCore import QObject, pyqtSignal, QRunnable
+from pdfrw import PdfWriter, PdfReader
+from PyQt5.QtCore import QObject, pyqtSignal
 
 
-class WorkerSignals(QObject):
+class Worker(QObject):
     # Create worker signals
-    finished = pyqtSignal()
     start = pyqtSignal()
-    error = pyqtSignal(tuple)
-    result = pyqtSignal(object)
     progress = pyqtSignal(int)
-
-
-class Worker(QRunnable):
-
-    def __init__(self, fn, *args, **kwargs):
-        super(Worker, self).__init__()
-        # Store constructor arguments (re-used for processing)
-        self.fn = fn
-        self.args = args
-        self.kwargs = kwargs
-        self.signals = WorkerSignals()
-        # Add the callback to our kwargs
-        self.kwargs['progress_callback'] = self.signals.progress
+    finished = pyqtSignal()
+    def __init__(self, fileCopy, fileInsertInto, pageStart, pageIteration):
+        super().__init__()
+        self.pageStart = pageStart
+        self.fileCopy = fileCopy
+        self.fileInsertInto = fileInsertInto
+        self.page = self.pageStart - 1
+        self.pages = 0
+        self.pageIterate = pageIteration
+        self.cnt = 0
+        self.currentPage = 0
+        self.readerCopy = PdfReader(self.fileCopy)
+        self.writer = PdfWriter()
 
     def run(self):
-        self.signals.start.emit()
-        # Retrieve args/kwargs here; and fire processing using them
-        try:
-            result = self.fn(*self.args, **self.kwargs)
-        except:
-            traceback.print_exc()
-            exctype, value = sys.exc_info()[:2]
-            self.signals.error.emit((exctype, value, traceback.format_exc()))
-        else:
-            self.signals.result.emit(result)
-        finally:
-            self.signals.finished.emit()
+        self.start.emit()
+        copyFrom_totalPages = len(PdfReader(self.fileCopy).pages)
+        # Loop through each file chosen by user
+        for files in range(len(self.fileInsertInto)):
+            # Read object for fileInsertInto file(s)
+            readerIns = PdfReader(self.fileInsertInto[files])
+            # Calculate the total pages for the current fileInsertInto file
+            insInto_totalPages = len(PdfReader(self.fileInsertInto[
+                                                   files]).pages)
+            # Calculate total number of pages upon merging...round up to nearest
+            # whole number
+            totalPages = math.ceil((insInto_totalPages + ((insInto_totalPages
+                                                           - self.pageStart) /
+                                                          self.pageIterate) *
+                                    copyFrom_totalPages))
+            while self.pages < totalPages:
+                if self.pages == self.page:
+                    self.writer.addpages(self.readerCopy.pages)
+                    self.page += self.pageIterate
+                    self.pages += copyFrom_totalPages
+                else:
+                    self.writer.addpage(readerIns.pages[self.currentPage])
+                    self.currentPage += 1
+                    self.pages += 1
+                while self.cnt < 100:
+                    self.cnt = self.cnt + (1/len(self.fileInsertInto))
+                    self.progress.emit(self.cnt)
+            # Write all the files into a file which is named as shown below
+            # File directory is that of the last insert into file chosen
+            directory = os.path.dirname(self.fileInsertInto[-1])
+            self.writer.write(
+                os.path.splitext(self.fileInsertInto[files])[0] + "_MERGED.pdf")
+        self.finished.emit()

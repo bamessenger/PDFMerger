@@ -2,5 +2,5 @@
     "app_name": "PDFMerger",
     "author": "Brandon Messenger",
     "main_module": "src/main/python/main.py",
-    "version": "3.0.0"
+    "version": "4.0.0"
 }

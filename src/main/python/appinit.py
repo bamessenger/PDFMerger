@@ -1,13 +1,9 @@
-
-import time
-
-from PyQt5.QtCore import QRunnable, QThreadPool, QObject, pyqtSignal
+from PyQt5.QtCore import QThread
 from PyQt5.QtWidgets import QFileDialog, QListView, QTreeView, \
     QAbstractItemView, QDialog, QMessageBox
 from PyQt5 import QtWidgets
 from userinterface import Ui_MainWindow
-from pdfmerge import ExecutePDF
-from worker import WorkerSignals, Worker
+from worker import Worker
 
 
 class MainWindowUI(QtWidgets.QMainWindow):
@@ -16,9 +12,6 @@ class MainWindowUI(QtWidgets.QMainWindow):
         self.ui = Ui_MainWindow()
         self.msgBox = QMessageBox()
         self.ui.setupUi(self)
-        self.signals = WorkerSignals()
-        self.threadpool = QThreadPool()
-        self.executePDF = ExecutePDF()
         # Connect button signals to slots
         self.ui.BrowseFileCopy.clicked.connect(self.browseCopyFrom)
         self.ui.BrowseFileInsertInto.clicked.connect(self.browseInsertInto)
@@ -54,20 +47,12 @@ class MainWindowUI(QtWidgets.QMainWindow):
             for file in range(len(self.insertIntoFiles)):
                 self.ui.FileNamesInsertInto.append(self.insertIntoFiles[file])
 
-    def pdfJob(self, progress_callback):
-        self.executePDF.merge(self.copyFromFile, self.insertIntoFiles,
-                              self.ui.InsertAfterPageNum.value(),
-                              self.ui.InsertEveryNthPageNum.value())
-        for n in range(0, 5):
-            time.sleep(1)
-            progress_callback.emit((n * 100 / 4))
-
     def progressNum(self, n):
         self.ui.progress_label.setText("Merging in Progress...%d%% done" % n)
 
     def startProc(self):
-        self.ui.progress_label.setText("Merging in Progress...firing up the "
-                                       "engine")
+        self.ui.frame_3.show()
+        self.ui.progress_label.setText("Merging in Progress...")
 
     def showCompletion(self):
         self.msgBox.setIcon(QMessageBox.Information)
@@ -78,7 +63,7 @@ class MainWindowUI(QtWidgets.QMainWindow):
 
     def completed(self):
         self.showCompletion()
-        self.ui.progress_label.setText(" ")
+        self.ui.frame_3.hide()
         return
 
     def clickedExecute(self):
@@ -88,9 +73,17 @@ class MainWindowUI(QtWidgets.QMainWindow):
 
     def runThreadedProcess(self):
         # Execute a function in the background with a worker
-        worker = Worker(self.pdfJob)
-        worker.signals.start.connect(self.startProc)
-        worker.signals.progress.connect(self.progressNum)
-        worker.signals.finished.connect(self.completed)
+        self.thread = QThread()
+        self.worker = Worker(self.copyFromFile, self.insertIntoFiles,
+                             self.ui.InsertAfterPageNum.value(),
+                             self.ui.InsertEveryNthPageNum.value())
+        self.worker.moveToThread(self.thread)
+        self.thread.started.connect(self.worker.run)
+        self.worker.start.connect(self.startProc)
+        self.worker.progress.connect(self.ui.progressBar.setValue)
+        self.worker.finished.connect(self.completed)
+        self.worker.finished.connect(self.thread.quit)
+        self.worker.finished.connect(self.worker.deleteLater)
+        self.thread.finished.connect(self.thread.deleteLater)
         # start worker
-        self.threadpool.start(worker)
+        self.thread.start()
