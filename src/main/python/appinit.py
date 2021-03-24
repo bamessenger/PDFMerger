@@ -1,4 +1,4 @@
-from PyQt5.QtCore import QThread
+from PyQt5.QtCore import QThreadPool
 from PyQt5.QtWidgets import QFileDialog, QListView, QTreeView, \
     QAbstractItemView, QDialog, QMessageBox
 from PyQt5 import QtWidgets
@@ -12,10 +12,13 @@ class MainWindowUI(QtWidgets.QMainWindow):
         self.ui = Ui_MainWindow()
         self.msgBox = QMessageBox()
         self.ui.setupUi(self)
+        self.workerProgress = {}
+        self.threadpool = QThreadPool()
         # Connect button signals to slots
         self.ui.BrowseFileCopy.clicked.connect(self.browseCopyFrom)
         self.ui.BrowseFileInsertInto.clicked.connect(self.browseInsertInto)
         self.ui.ExecuteButton.clicked.connect(self.clickedExecute)
+        self.count = 0
 
     def browseCopyFrom(self):
         options = QtWidgets.QFileDialog.Options()
@@ -47,12 +50,16 @@ class MainWindowUI(QtWidgets.QMainWindow):
             for file in range(len(self.insertIntoFiles)):
                 self.ui.FileNamesInsertInto.append(self.insertIntoFiles[file])
 
-    def progressNum(self, n):
-        self.ui.progress_label.setText("Merging in Progress...%d%% done" % n)
-
     def startProc(self):
         self.ui.frame_3.show()
         self.ui.progress_label.setText("Merging in Progress...")
+
+    def progressProc(self):
+        pass
+
+    def finishedProc(self):
+        self.showCompletion()
+        self.ui.frame_3.hide()
 
     def showCompletion(self):
         self.msgBox.setIcon(QMessageBox.Information)
@@ -61,29 +68,22 @@ class MainWindowUI(QtWidgets.QMainWindow):
         self.msgBox.setStandardButtons(QMessageBox.Ok)
         self.msgBox.exec()
 
-    def completed(self):
-        self.showCompletion()
-        self.ui.frame_3.hide()
-        return
-
     def clickedExecute(self):
         # call process
         self.stopped = False
         self.runThreadedProcess()
 
-    def runThreadedProcess(self):
-        # Execute a function in the background with a worker
-        self.thread = QThread()
-        self.worker = Worker(self.copyFromFile, self.insertIntoFiles,
-                             self.ui.InsertAfterPageNum.value(),
-                             self.ui.InsertEveryNthPageNum.value())
-        self.worker.moveToThread(self.thread)
-        self.thread.started.connect(self.worker.run)
-        self.worker.start.connect(self.startProc)
-        self.worker.progress.connect(self.ui.progressBar.setValue)
-        self.worker.finished.connect(self.completed)
-        self.worker.finished.connect(self.thread.quit)
-        self.worker.finished.connect(self.worker.deleteLater)
-        self.thread.finished.connect(self.thread.deleteLater)
+    def enqueue(self, worker):
         # start worker
-        self.thread.start()
+        self.threadpool.start(worker)
+
+        self.worker.signals.start.connect(self.startProc)
+        #self.worker.signals.progress.connect(self.progress)
+        self.worker.signals.finish.connect(self.finishedProc)
+
+    def startWorker(self):
+        files = len(self.insertIntoFiles)
+        for file in range(files):
+            self.worker = Worker(self.copyFromFile, self.insertIntoFiles[file],
+                                 self.ui.InsertAfterPageNum.value(),
+                                 self.ui.InsertEveryNthPageNum.value())
