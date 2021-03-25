@@ -51,7 +51,6 @@ class Worker(QRunnable):
         # create unique identifier for each worker
         self.jobID = str(uuid.uuid4().hex)
         self.signals = WorkerSignals()
-        self.wm = WorkerManager()
 
     def run(self):
         self.signals.started.emit(self.jobID)
