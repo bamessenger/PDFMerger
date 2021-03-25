@@ -3,15 +3,39 @@ import os.path
 import uuid
 
 from pdfrw import PdfWriter, PdfReader
-from PyQt5.QtCore import pyqtSignal, QRunnable, QObject
+from PyQt5.QtCore import pyqtSignal, QRunnable, QObject, QThreadPool
 
 
 class WorkerSignals(QObject):
     # Create worker signals
-    start = pyqtSignal()
-    progress = pyqtSignal(str)
-    finish = pyqtSignal()
+    started = pyqtSignal(str)
+    progress = pyqtSignal(int)
+    finished = pyqtSignal(str)
+    completed = pyqtSignal()
 
+class WorkerManager(QObject):
+
+    _workers = {}
+
+    def __init__(self):
+        super().__init__()
+
+        # Create a threadpool for workers.
+        self.threadpool = QThreadPool()
+        self.signals = WorkerSignals()
+
+    def enqueue(self, worker):
+        worker.signals.finished.connect(self.notifyCompletion)
+        self.threadpool.start(worker)
+        self._workers[worker.jobID] = worker
+
+    def notifyCompletion(self, jobID):
+        self._workers[jobID] = 'Complete'
+        num = sum(x == 'Complete' for x in self._workers.values())
+        val = num * 100
+        self.signals.progress.emit(val)
+        if all(x == 'Complete' for x in self._workers.values()):
+            self.signals.completed.emit()
 
 class Worker(QRunnable):
     def __init__(self, fileCopy, fileInsInto, pageStart, pageIteration):
@@ -24,11 +48,13 @@ class Worker(QRunnable):
         self.currentPage = 0
         self.writer = PdfWriter()
         self.fileInsInto = fileInsInto
-        self.jobID = uuid.uuid4().hex
+        # create unique identifier for each worker
+        self.jobID = str(uuid.uuid4().hex)
         self.signals = WorkerSignals()
+        self.wm = WorkerManager()
 
     def run(self):
-        self.signals.start.emit()
+        self.signals.started.emit(self.jobID)
         self.fPath = PdfReader(self.fileInsInto)
         outfn = os.path.splitext(self.fileInsInto)[0] + "_MERGED.pdf"
         copyFrom_totalPages = len(PdfReader(self.fileCopy).pages)
@@ -52,4 +78,4 @@ class Worker(QRunnable):
         # Write all the files into a file which is named as shown below
         # File directory is that of the last insert into file chosen
         self.writer.write(outfn)
-        self.signals.finish.emit()
+        self.signals.finished.emit(self.jobID)

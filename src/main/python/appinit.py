@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import QFileDialog, QListView, QTreeView, \
     QAbstractItemView, QDialog, QMessageBox
 from PyQt5 import QtWidgets
 from userinterface import Ui_MainWindow
-from worker import Worker
+from worker import WorkerManager, Worker
 
 
 class MainWindowUI(QtWidgets.QMainWindow):
@@ -12,13 +12,12 @@ class MainWindowUI(QtWidgets.QMainWindow):
         self.ui = Ui_MainWindow()
         self.msgBox = QMessageBox()
         self.ui.setupUi(self)
-        self.workerProgress = {}
         self.threadpool = QThreadPool()
+        self.worker = WorkerManager()
         # Connect button signals to slots
         self.ui.BrowseFileCopy.clicked.connect(self.browseCopyFrom)
         self.ui.BrowseFileInsertInto.clicked.connect(self.browseInsertInto)
-        self.ui.ExecuteButton.clicked.connect(self.clickedExecute)
-        self.count = 0
+        self.ui.ExecuteButton.clicked.connect(self.startWorker)
 
     def browseCopyFrom(self):
         options = QtWidgets.QFileDialog.Options()
@@ -54,10 +53,11 @@ class MainWindowUI(QtWidgets.QMainWindow):
         self.ui.frame_3.show()
         self.ui.progress_label.setText("Merging in Progress...")
 
-    def progressProc(self):
-        pass
+    def progressProc(self, val):
+        percent = val / self.files
+        self.ui.progressBar.setValue(percent)
 
-    def finishedProc(self):
+    def completedProc(self):
         self.showCompletion()
         self.ui.frame_3.hide()
 
@@ -68,22 +68,13 @@ class MainWindowUI(QtWidgets.QMainWindow):
         self.msgBox.setStandardButtons(QMessageBox.Ok)
         self.msgBox.exec()
 
-    def clickedExecute(self):
-        # call process
-        self.stopped = False
-        self.runThreadedProcess()
-
-    def enqueue(self, worker):
-        # start worker
-        self.threadpool.start(worker)
-
-        self.worker.signals.start.connect(self.startProc)
-        #self.worker.signals.progress.connect(self.progress)
-        self.worker.signals.finish.connect(self.finishedProc)
-
     def startWorker(self):
-        files = len(self.insertIntoFiles)
-        for file in range(files):
-            self.worker = Worker(self.copyFromFile, self.insertIntoFiles[file],
+        self.files = len(self.insertIntoFiles)
+        self.worker.signals.completed.connect(self.completedProc)
+        self.worker.signals.progress.connect(self.progressProc)
+        for file in range(self.files):
+            w = Worker(self.copyFromFile, self.insertIntoFiles[file],
                                  self.ui.InsertAfterPageNum.value(),
                                  self.ui.InsertEveryNthPageNum.value())
+            w.signals.started.connect(self.startProc)
+            self.worker.enqueue(w)
